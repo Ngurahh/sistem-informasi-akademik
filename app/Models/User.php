@@ -1,15 +1,16 @@
 <?php
+// app/Models/User.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
+use Spatie\Permission\Traits\HasRoles; // ← PASTIKAN INI ADA
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles; // ← PASTIKAN HasRoles ADA DI SINI
 
     protected $fillable = [
         'name', 'email', 'password', 'phone', 'address', 
@@ -24,6 +25,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'birth_date' => 'date',
         'is_active' => 'boolean',
+        'password' => 'hashed', // Laravel 10+
     ];
 
     // Relationships
@@ -42,27 +44,24 @@ class User extends Authenticatable
         return $this->hasMany(Grade::class, 'teacher_id');
     }
 
-    // Accessors
-    public function getAvatarUrlAttribute()
+    // Helper methods untuk role checking
+    public function isAdmin()
     {
-        return $this->avatar 
-            ? asset('storage/avatars/' . $this->avatar)
-            : asset('images/default-avatar.png');
+        return $this->hasRole('admin');
     }
 
-    // Scopes
-    public function scopeActive($query)
+    public function isTeacher()
     {
-        return $query->where('is_active', true);
+        return $this->hasRole('teacher');
     }
 
-    public function scopeTeachers($query)
+    public function isStudent()
     {
-        return $query->role('teacher');
+        return $this->hasRole('student');
     }
 
-    public function scopeStudents($query)
+    public function isParent()
     {
-        return $query->role('student');
+        return $this->hasRole('parent');
     }
 }

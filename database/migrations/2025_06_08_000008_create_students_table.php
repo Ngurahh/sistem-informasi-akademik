@@ -1,5 +1,5 @@
 <?php
-// database/migrations/2024_01_01_000002_create_students_table.php
+// database/migrations/2024_01_01_000003_create_students_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -11,10 +11,10 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('student_id')->unique(); // NIS
             $table->string('nisn')->unique()->nullable();
-            $table->foreignId('class_id')->constrained()->onDelete('cascade');
+            $table->foreignId('class_id')->constrained('classes')->onDelete('cascade');
             $table->string('parent_name');
             $table->string('parent_phone');
             $table->string('parent_email')->nullable();
@@ -27,6 +27,12 @@ return new class extends Migration
 
     public function down()
     {
+        // Drop foreign key constraints first
+        Schema::table('students', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+            $table->dropForeign(['class_id']);
+        });
+        
         Schema::dropIfExists('students');
     }
 };
